@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý đơn hàng</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; }
+        .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .table-wrap { width: 100%; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; min-width: 980px; }
+        th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+        th { background: #f5f5f5; text-align: left; }
+        .actions { display: flex; gap: 8px; align-items: center; }
+        .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; }
+        .msg-success { background: #e9f7ef; border: 1px solid #b7e1c3; color: #1e6a39; }
+        .msg-error { background: #fdecec; border: 1px solid #f5b8b8; color: #9b1c1c; }
+        a.button, button {
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #111;
+            font: inherit;
+            line-height: 1.2;
+        }
+        button { appearance: none; }
+        a.button-primary { background: #0b5fff; border-color: #0b5fff; color: #fff; }
+        .empty { padding: 12px 0; color: #555; }
+        input[type="text"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; min-width: 280px; }
+        .nowrap { white-space: nowrap; }
+    </style>
+</head>
+<body>
+<h2>Danh sách đơn hàng</h2>
+
+<div th:if="${successMessage}" class="msg msg-success" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" class="msg msg-error" th:text="${errorMessage}"></div>
+
+<div class="toolbar">
+    <form th:action="@{/orders}" method="get" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="text" name="q" placeholder="Tìm theo mã đơn / tên KH" th:value="${q}">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+    <a class="button button-primary" th:href="@{/orders/new}">Thêm mới</a>
+</div>
+
+<div th:if="${#lists.isEmpty(orders)}" class="empty">Không có đơn hàng nào.</div>
+
+<div class="table-wrap" th:if="${!#lists.isEmpty(orders)}">
+<table>
+    <thead>
+    <tr>
+        <th style="width:60px;">STT</th>
+        <th style="width:140px;">Mã đơn hàng</th>
+        <th style="min-width:260px;">Tên KH</th>
+        <th style="width:120px;">Ngày đặt</th>
+        <th style="width:180px;">Tổng tiền (VNĐ)</th>
+        <th style="width:140px;">Trạng thái</th>
+        <th style="width:180px;">Thao tác</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="o, stat : ${orders}">
+        <td th:text="${stat.count}"></td>
+        <td class="nowrap" th:text="${o.orderCode}"></td>
+        <td th:text="${o.customerName}"></td>
+        <td class="nowrap" th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}"></td>
+        <td class="nowrap" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 2, 'POINT')}"></td>
+        <td class="nowrap" th:text="${o.status.label}"></td>
+        <td>
+            <div class="actions">
+                <a class="button" th:href="@{/orders/{id}/edit(id=${o.id})}">Sửa</a>
+                <form th:action="@{/orders/{id}/delete(id=${o.id})}" method="post"
+                      th:onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này?');" style="margin:0;">
+                    <button type="submit">Xóa</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+</body>
+</html>
